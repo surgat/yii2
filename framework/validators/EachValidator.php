@@ -114,7 +114,7 @@ class EachValidator extends Validator
      */
     public function validateAttribute($model, $attribute)
     {
-        $value = $model->$attribute;
+        $value = $this->getAttributeValue($model, $attribute);
         $validator = $this->getValidator();
         if ($validator instanceof FilterValidator && is_array($value)) {
             $filteredValue = [];
@@ -123,7 +123,7 @@ class EachValidator extends Validator
                     $filteredValue[$k] = call_user_func($validator->filter, $v);
                 }
             }
-            $model->$attribute = $filteredValue;
+            $this->setAttributeValue($model, $attribute, $filteredValue);
         } else {
             $this->getValidator($model); // ensure model context while validator creation
             parent::validateAttribute($model, $attribute);

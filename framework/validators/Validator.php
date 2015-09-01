@@ -10,6 +10,7 @@ namespace yii\validators;
 use Yii;
 use yii\base\Component;
 use yii\base\NotSupportedException;
+use yii\helpers\ArrayHelper;
 
 /**
  * Validator is the base class for all validators.
@@ -234,7 +235,7 @@ class Validator extends Component
         }
         foreach ($attributes as $attribute) {
             $skip = $this->skipOnError && $model->hasErrors($attribute)
-                || $this->skipOnEmpty && $this->isEmpty($model->$attribute);
+                || $this->skipOnEmpty && $this->isEmpty($this->getAttributeValue($model, $attribute));
             if (!$skip) {
                 if ($this->when === null || call_user_func($this->when, $model, $attribute)) {
                     $this->validateAttribute($model, $attribute);
@@ -251,7 +252,7 @@ class Validator extends Component
      */
     public function validateAttribute($model, $attribute)
     {
-        $result = $this->validateValue($model->$attribute);
+        $result = $this->validateValue($this->getAttributeValue($model, $attribute));
         if (!empty($result)) {
             $this->addError($model, $attribute, $result[0], $result[1]);
         }
@@ -344,7 +345,7 @@ class Validator extends Component
      */
     public function addError($model, $attribute, $message, $params = [])
     {
-        $value = $model->$attribute;
+        $value = $this->getAttributeValue($model, $attribute);
         $params['attribute'] = $model->getAttributeLabel($attribute);
         $params['value'] = is_array($value) ? 'array()' : $value;
         $model->addError($attribute, Yii::$app->getI18n()->format($message, $params, Yii::$app->language));
@@ -364,5 +365,20 @@ class Validator extends Component
         } else {
             return $value === null || $value === [] || $value === '';
         }
+    }
+
+    public function getAttributeValue($model, $attribute)
+    {
+        return ArrayHelper::getValue($model, $attribute);
+    }
+
+    public function setAttributeValue($model, $attribute, $value)
+    {
+        if (($pos = strrpos($attribute, '.')) !== false) {
+           $model = ArrayHelper::getValue($model, substr($attribute, 0, $pos));
+           $attribute = substr($attribute, $pos + 1);
+        }
+
+        $model->$attribute = $value;
     }
 }

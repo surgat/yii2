@@ -2025,8 +2025,7 @@ class BaseHtml
         if (!preg_match('/(^|.*\])([\w\.]+)(\[.*|$)/', $attribute, $matches)) {
             throw new InvalidParamException('Attribute name must contain word characters only.');
         }
-        $attribute = $matches[2];
-        $value = $model->$attribute;
+        $value = ArrayHelper::getValue($model, $matches[2]);
         if ($matches[3] !== '') {
             foreach (explode('][', trim($matches[3], '[]')) as $id) {
                 if ((is_array($value) || $value instanceof \ArrayAccess) && isset($value[$id])) {
@@ -2078,10 +2077,16 @@ class BaseHtml
         $prefix = $matches[1];
         $attribute = $matches[2];
         $suffix = $matches[3];
+        $embeddedAttributes = '';
+        if (strpos($attribute, '.')) {
+            $list = explode('.', $attribute);
+            $attribute = array_shift($list);
+            $embeddedAttributes = '[' . implode('][', $list) . ']';
+        }
         if ($formName === '' && $prefix === '') {
-            return $attribute . $suffix;
+            return $attribute . $embeddedAttributes . $suffix;
         } elseif ($formName !== '') {
-            return $formName . $prefix . "[$attribute]" . $suffix;
+            return $formName . $prefix . "[$attribute]" . $embeddedAttributes . $suffix;
         } else {
             throw new InvalidParamException(get_class($model) . '::formName() cannot be empty for tabular inputs.');
         }

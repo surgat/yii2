@@ -225,4 +225,35 @@ class ValidatorTest extends TestCase
         $errors = $m->getErrors('attr_msg_val');
         $this->assertEquals('attr_msg_val::abc::param_value', $errors[0]);
     }
+
+    public function testGetAttributeValue()
+    {
+        $attrTest2 = new \stdClass;
+        $attrTest2->bool = true;
+        $attrTest2->number = '2015';
+        $model = $this->getTestModel(['attr_test1' => 'abc', 'attr_test2' => $attrTest2]);
+
+        $val = new TestValidator();
+        $this->assertEquals('abc', $val->getAttributeValue($model, 'attr_test1'));
+        $this->assertEquals($attrTest2, $val->getAttributeValue($model, 'attr_test2'));
+        $this->assertEquals(true, $val->getAttributeValue($model, 'attr_test2.bool'));
+        $this->assertEquals('2015', $val->getAttributeValue($model, 'attr_test2.number'));
+    }
+
+    public function testSetAttributeValue()
+    {
+        $attrTest2 = new \stdClass;
+        $attrTest2->bool = true;
+        $attrTest2->number = '2015';
+
+        $model = $this->getTestModel(['attr_test1' => 'abc', 'attr_test2' => $attrTest2]);
+
+        $val = new TestValidator();
+        $val->setAttributeValue($model, 'attr_test1', 'cba');
+        $this->assertEquals('cba', $model->attr_test1);
+        $val->setAttributeValue($model, 'attr_test2.bool', false);
+        $this->assertEquals(false, $model->attr_test2->bool);
+        $val->setAttributeValue($model, 'attr_test2.number', '2016');
+        $this->assertEquals('2016', $model->attr_test2->number);
+    }
 }

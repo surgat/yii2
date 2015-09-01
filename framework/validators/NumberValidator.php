@@ -79,7 +79,7 @@ class NumberValidator extends Validator
      */
     public function validateAttribute($model, $attribute)
     {
-        $value = $model->$attribute;
+        $value = $this->getAttributeValue($model, $attribute);
         if (is_array($value)) {
             $this->addError($model, $attribute, $this->message);
             return;

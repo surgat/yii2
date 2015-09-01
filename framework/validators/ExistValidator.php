@@ -94,7 +94,7 @@ class ExistValidator extends Validator
                 $params[$v] = is_int($k) ? $model->$v : $model->$k;
             }
         } else {
-            $params = [$targetAttribute => $model->$attribute];
+            $params = [$targetAttribute => $this->getAttributeValue($model, $attribute)];
         }
 
         if (!$this->allowArray) {
@@ -110,8 +110,8 @@ class ExistValidator extends Validator
         $targetClass = $this->targetClass === null ? get_class($model) : $this->targetClass;
         $query = $this->createQuery($targetClass, $params);
 
-        if (is_array($model->$attribute)) {
-            if ($query->count("DISTINCT [[$targetAttribute]]") != count($model->$attribute)) {
+        if (is_array($this->getAttributeValue($model, $attribute))) {
+            if ($query->count("DISTINCT [[$targetAttribute]]") != count($this->getAttributeValue($model, $attribute))) {
                 $this->addError($model, $attribute, $this->message);
             }
         } elseif (!$query->exists()) {

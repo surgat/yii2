@@ -121,7 +121,7 @@ class CompareValidator extends Validator
      */
     public function validateAttribute($model, $attribute)
     {
-        $value = $model->$attribute;
+        $value = $this->getAttributeValue($model, $attribute);
         if (is_array($value)) {
             $this->addError($model, $attribute, Yii::t('yii', '{attribute} is invalid.'));
 

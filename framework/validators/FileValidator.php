@@ -169,7 +169,7 @@ class FileValidator extends Validator
     public function validateAttribute($model, $attribute)
     {
         if ($this->maxFiles > 1) {
-            $files = $model->$attribute;
+            $files = $this->getAttributeValue($model, $attribute);
             if (!is_array($files)) {
                 $this->addError($model, $attribute, $this->uploadRequired);
 
@@ -180,7 +180,7 @@ class FileValidator extends Validator
                     unset($files[$i]);
                 }
             }
-            $model->$attribute = array_values($files);
+            $this->setAttributeValue($model, $attribute, array_values($files));
             if (empty($files)) {
                 $this->addError($model, $attribute, $this->uploadRequired);
             }
@@ -195,7 +195,7 @@ class FileValidator extends Validator
                 }
             }
         } else {
-            $result = $this->validateValue($model->$attribute);
+            $result = $this->validateValue($this->getAttributeValue($model, $attribute));
             if (!empty($result)) {
                 $this->addError($model, $attribute, $result[0], $result[1]);
             }

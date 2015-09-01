@@ -86,7 +86,7 @@ class UniqueValidator extends Validator
                 $params[$v] = is_int($k) ? $model->$v : $model->$k;
             }
         } else {
-            $params = [$targetAttribute => $model->$attribute];
+            $params = [$targetAttribute => $this->getAttributeValue($model, $attribute)];
         }
 
         foreach ($params as $value) {
