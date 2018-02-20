@@ -658,7 +658,7 @@ PATTERN;
      */
     protected function getUniqueColumns($columns)
     {
-        $columns = array_unique($columns);
+        $usedNames = [];
         $unaliasedColumns = $this->getUnaliasedColumnsFromSelect();
 
         foreach ($columns as $columnAlias => $columnDefinition) {
@@ -666,11 +666,18 @@ PATTERN;
                 continue;
             }
 
-            if (
-                (is_string($columnAlias) && isset($this->select[$columnAlias]) && $this->select[$columnAlias] === $columnDefinition)
-                || (is_integer($columnAlias) && in_array($columnDefinition, $unaliasedColumns))
-            ) {
-                unset($columns[$columnAlias]);
+            if (is_string($columnAlias)) {
+                if (isset($usedNames[$columnAlias]) || (isset($this->select[$columnAlias]) && $this->select[$columnAlias] === $columnDefinition)) {
+                    unset($columns[$columnAlias]);
+                } else {
+                    $usedNames[$columnAlias] = true;
+                }
+            } else if (is_integer($columnAlias)) {
+                if (isset($usedNames[$columnDefinition]) || in_array($columnDefinition, $unaliasedColumns)) {
+                    unset($columns[$columnAlias]);
+                } else {
+                    $usedNames[$columnDefinition] = true;
+                }
             }
         }
         return $columns;
